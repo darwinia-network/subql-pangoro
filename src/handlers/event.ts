@@ -3,7 +3,7 @@ import { Dispatcher } from '../helpers/dispatcher';
 import { Event } from '../types/models/Event';
 import { BlockHandler } from './block';
 import { ExtrinsicHandler } from './extrinsic';
-import { S2SEventHandler } from './s2sEvent';
+import { S2SEventHandler } from './sub-handlers/s2sEvent';
 import { TransferHandler } from './sub-handlers/transfer';
 
 type EventDispatch = Dispatcher<SubstrateEvent>;
@@ -14,9 +14,6 @@ export class EventHandler {
 
   constructor(event: SubstrateEvent) {
     this.event = event;
-    this.dispatcher = new Dispatcher();
-
-    this.dispatcher.batchRegister([]);
   }
 
   get index() {
@@ -89,8 +86,6 @@ export class EventHandler {
       if (this.extrinsicHash) {
         event.extrinsicId = this.extrinsicHash;
       }
-
-      await this.dispatcher.dispatch(`${this.section}-${this.method}`, this.event);
 
       await event.save();
     };

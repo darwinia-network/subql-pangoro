@@ -1,5 +1,5 @@
 import { SubstrateEvent } from '@subql/types';
-import { S2SEvent } from '../types';
+import { S2SEvent } from '../../types';
 
 export class S2SEventHandler {
   private event: SubstrateEvent;
@@ -36,16 +36,9 @@ export class S2SEventHandler {
 
   public async save() {
     if (this.method === 'TokenLocked') {
-      const [
-        messageId,
-        {
-          native: { address, value },
-        },
-        sender,
-        recipient,
-      ] = JSON.parse(this.data) as [
+      const [messageId, token, sender, recipient, value] = JSON.parse(this.data) as [
         string,
-        { native: { address: string; value: number; option: null } },
+        string | Record<string, any>,
         string,
         string,
         number
@@ -56,7 +49,7 @@ export class S2SEventHandler {
       event.startTimestamp = this.timestamp;
       event.sender = sender;
       event.recipient = recipient;
-      event.token = address;
+      event.token = typeof token === 'string' ? token : token.native.address;
       event.amount = value.toString();
       event.result = 0;
       event.endTimestamp = null;
@@ -68,7 +61,7 @@ export class S2SEventHandler {
     if (this.method === 'TokenLockedConfirmed') {
       const [messageId, _1, _2, confirmResult] = JSON.parse(this.data) as [
         string,
-        { native: { address: string; value: number; option: null } },
+        string | Record<string, any>,
         string,
         boolean
       ];
@@ -79,7 +72,6 @@ export class S2SEventHandler {
         event.responseTxHash = this.extrinsicHash;
         event.endTimestamp = this.timestamp;
         event.result = confirmResult ? 1 : 2;
-
 
         await event.save();
       }

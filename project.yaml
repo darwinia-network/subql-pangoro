@@ -176,7 +176,7 @@ network:
       _enum:
         Eth: EcdsaSignature
         Tron: EcdsaSignature
-    OutboundLaneData:
+    OutboundLaneData: 
       oldestUnprunedNonce: MessageNonce
       latestGeneratedNonce: MessageNonce
       latestReceivedNonce: MessageNonce
@@ -270,20 +270,13 @@ network:
       value: Compact<Balance>
       startTime: Compact<TsInMs>
       expireTime: Compact<TsInMs>
-    TokenOption: 
+    TokenMessageId: '[u8; 16; TokenMessageId]'
+    TokenMetadata:
+      tokenType: u32
+      address: H160
       name: Vec<u8>
       symbol: Vec<u8>
       decimal: u8
-    TokenMessageId: '[u8; 16; TokenMessageId]'
-    TokenInfo:
-      address: H160
-      value: Option<U256>
-      option: Option<TokenOption>
-    Token:
-      _enum:
-        InvalidToken: null
-        Native: TokenInfo
-        Erc20: TokenInfo
     TransactionOutcome: '{}'
     TreasuryProposal:
       proposer: AccountId
@@ -306,6 +299,36 @@ network:
     UsableBalance:
       usableBalance: Balance
     ValidatorPrefs: ValidatorPrefsWithBlocked
+  typesBundle:
+      spec:
+        Darwinia:
+          types:
+            - minmax:
+                - 0
+                - 2690
+              types:
+                TokenInfo:
+                  address: H160
+                  value: Option<U256>
+                  option: Option<TokenOption>
+                Token:
+                  _enum:
+                    InvalidToken: null
+                    Native: TokenInfo
+                    Erc20: TokenInfo
+                TokenOption: 
+                  name: Vec<u8>
+                  symbol: Vec<u8>
+                  decimal: u8
+            - minmax:
+                - 2690
+              types:
+                TokenMetadata:
+                  tokenType: u32
+                  address: H160
+                  name: Vec<u8>
+                  symbol: Vec<u8>
+                  decimal: u8
 repository: ''
 schema: ./schema.graphql
 specVersion: 0.0.1

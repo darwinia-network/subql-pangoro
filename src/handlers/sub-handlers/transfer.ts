@@ -12,10 +12,6 @@ enum FeePosition {
 
 export class TransferHandler {
   static async checkTransfer({ event, block: { events, timestamp, block } }: SubstrateEvent) {
-    if (event.method !== 'Transfer' ) {
-      return;
-    }
-
     const { data, section } = event;
     const [from, to, amount] = JSON.parse(data.toString());
 

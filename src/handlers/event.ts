@@ -10,7 +10,6 @@ type EventDispatch = Dispatcher<SubstrateEvent>;
 
 export class EventHandler {
   private event: SubstrateEvent;
-  private dispatcher: EventDispatch;
 
   constructor(event: SubstrateEvent) {
     this.event = event;
@@ -61,62 +60,31 @@ export class EventHandler {
   public async save() {
     await BlockHandler.ensureBlock(this.blockHash);
 
+    const event = new Event(`${this.blockNumber}-${this.index}`);
+
+    event.index = this.index;
+    event.section = this.section;
+    event.method = this.method;
+    event.data = this.data;
+
+    event.blockId = this.blockHash;
+    event.timestamp = this.timestamp;
+
     if (this.extrinsicHash) {
       await ExtrinsicHandler.ensureExtrinsic(this.extrinsicHash);
+
+      event.extrinsicId = this.extrinsicHash;
     }
 
-    const saveEvent = async (source: {
-      id: string;
-      index: number;
-      section: string;
-      method: string;
-      data: string;
-    }): Promise<void> => {
-      const { id, index, section, method, data } = source;
-      const event = new Event(id);
+    await event.save();
 
-      event.index = index;
-      event.section = section;
-      event.method = method;
-      event.data = data;
-
-      event.blockId = this.blockHash;
-      event.timestamp = this.timestamp;
-
-      if (this.extrinsicHash) {
-        event.extrinsicId = this.extrinsicHash;
-      }
-
-      await event.save();
-    };
-
-    // await saveEvent({ id: this.id, index: this.index, method: this.method, data: this.data, section: this.section });
-
-    const records = this.events
-      .map((item, index) => {
-        const { event } = item;
-
-        if (event.method === 'ExtrinsicSuccess') {
-          return null;
-        }
-
-        return saveEvent({
-          id: `${this.blockNumber}-${index}`,
-          section: event.section,
-          data: event.data.toString(),
-          method: event.method,
-          index,
-        });
-      })
-      .filter((item) => !!item);
-
-    await Promise.all(records);
-
-    await TransferHandler.checkTransfer(this.event);
+    if (this.method === 'Transfer') {
+      await TransferHandler.checkTransfer(this.event);
+    }
 
     if (this.section === 'substrate2SubstrateBacking') {
       const s2sEvent = new S2SEventHandler(this.event);
-      
+
       await s2sEvent.save();
     }
   }

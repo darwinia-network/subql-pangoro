@@ -76,5 +76,28 @@ export class S2SEventHandler {
         await event.save();
       }
     }
+
+    if (this.method === 'TokenUnlocked') {
+      const [ messageId, token, recipient, amount ] = JSON.parse(this.data) as [ 
+        string,
+        string | Record<string, any>,
+        string,
+        string,
+        number
+      ];
+
+      const event = await S2SEvent.get(messageId);
+
+      if (event) {
+        event.recipient = recipient;
+        event.requestTxHash = this.extrinsicHash;
+        event.responseTxHash = this.extrinsicHash;
+        event.amount = amount;
+        event.token = typeof token === 'string' ? token : token.native.address;
+        event.startTimestamp = this.timestamp;
+        event.endTimestamp = this.timestamp;
+        event.result = 1;
+      }
+    }
   }
 }

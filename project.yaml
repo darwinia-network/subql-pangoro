@@ -134,6 +134,8 @@ network:
       ringBalance: Compact<Balance>
       ktonBalance: Compact<Balance>
       power: Power
+    InProcessOrders:
+      orders: Vec<LaneId, MessageNonce>
     KtonBalance: Balance
     LockFor:
       _enum:
@@ -322,6 +324,7 @@ network:
                   decimal: u8
             - minmax:
                 - 2690
+                - 26100
               types:
                 TokenMetadata:
                   tokenType: u32
@@ -329,6 +332,16 @@ network:
                   name: Vec<u8>
                   symbol: Vec<u8>
                   decimal: u8
+            - minmax:
+                - 26100
+              types:
+                Order:
+                  lane: LaneId
+                  message: MessageNonce
+                  sentTime: BlockNumber
+                  confirmTime: BlockNumber
+                  lockedCollateral: Balance
+                  assignedRelayers: Vec<PriorRelayer>
 repository: ''
 schema: ./schema.graphql
 specVersion: 0.0.1

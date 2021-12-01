@@ -39,16 +39,18 @@ export class S2SEventHandler {
 
     if (this.method === 'TokenLocked') {
       // [lane_id, message_nonce, token address, sender, recipient, amount]
-      const [laneId, _msgNonce, token, sender, recipient, value] = JSON.parse(this.data) as [
+      const [laneId, nonce, token, sender, recipient, value] = JSON.parse(this.data) as [
         string,
-        string,
+        bigint,
         string | Record<string, any>,
         string,
         string,
         number
       ];
-      const event = new S2SEvent(laneId);
+      const event = new S2SEvent(laneId + nonce);
 
+      event.laneId = laneId;
+      event.nonce = nonce;
       event.requestTxHash = this.extrinsicHash;
       event.startTimestamp = this.timestamp;
       event.sender = sender;
@@ -64,15 +66,15 @@ export class S2SEventHandler {
 
     if (this.method === 'TokenLockedConfirmed') {
       // [lane_id, message_nonce, user, amount, result]
-      const [laneId, _msgNonce, _1, _2, confirmResult] = JSON.parse(this.data) as [
+      const [laneId, nonce, _1, _2, confirmResult] = JSON.parse(this.data) as [
         string,
-        string,
+        bigint,
         string | Record<string, any>,
         string,
         boolean
       ];
 
-      const event = await S2SEvent.get(laneId);
+      const event = await S2SEvent.get(laneId + nonce);
 
       if (event) {
         event.responseTxHash = this.extrinsicHash;
@@ -85,18 +87,20 @@ export class S2SEventHandler {
 
     if (this.method === 'TokenUnlocked') {
       // [lane_id, message_nonce, token_address, recipient, amount]
-      const [laneId, _msgNonce, token, recipient, amount] = JSON.parse(this.data) as [
+      const [laneId, nonce, token, recipient, amount] = JSON.parse(this.data) as [
         string,
-        string,
+        bigint,
         string | Record<string, any>,
         string,
         string,
         number
       ];
 
-      const event = await S2SEvent.get(laneId);
+      const event = await S2SEvent.get(laneId + nonce);
 
       if (event) {
+        event.laneId = laneId;
+        event.nonce = nonce;
         event.recipient = recipient;
         event.requestTxHash = this.extrinsicHash;
         event.responseTxHash = this.extrinsicHash;

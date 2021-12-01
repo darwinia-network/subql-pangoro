@@ -12,6 +12,10 @@ export class S2SEvent implements Entity {
 
     public id: string;
 
+    public laneId: string;
+
+    public nonce: bigint;
+
     public requestTxHash: string;
 
     public responseTxHash?: string;

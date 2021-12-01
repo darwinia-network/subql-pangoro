@@ -35,15 +35,19 @@ export class S2SEventHandler {
   }
 
   public async save() {
+    // data structure: https://github.com/darwinia-network/darwinia-common/blob/master/frame/wormhole/backing/s2s/src/lib.rs
+
     if (this.method === 'TokenLocked') {
-      const [messageId, token, sender, recipient, value] = JSON.parse(this.data) as [
+      // [lane_id, message_nonce, token address, sender, recipient, amount]
+      const [laneId, _msgNonce, token, sender, recipient, value] = JSON.parse(this.data) as [
+        string,
         string,
         string | Record<string, any>,
         string,
         string,
         number
       ];
-      const event = new S2SEvent(messageId);
+      const event = new S2SEvent(laneId);
 
       event.requestTxHash = this.extrinsicHash;
       event.startTimestamp = this.timestamp;
@@ -59,14 +63,16 @@ export class S2SEventHandler {
     }
 
     if (this.method === 'TokenLockedConfirmed') {
-      const [messageId, _1, _2, confirmResult] = JSON.parse(this.data) as [
+      // [lane_id, message_nonce, user, amount, result]
+      const [laneId, _msgNonce, _1, _2, confirmResult] = JSON.parse(this.data) as [
+        string,
         string,
         string | Record<string, any>,
         string,
         boolean
       ];
 
-      const event = await S2SEvent.get(messageId);
+      const event = await S2SEvent.get(laneId);
 
       if (event) {
         event.responseTxHash = this.extrinsicHash;
@@ -78,7 +84,9 @@ export class S2SEventHandler {
     }
 
     if (this.method === 'TokenUnlocked') {
-      const [ messageId, token, recipient, amount ] = JSON.parse(this.data) as [ 
+      // [lane_id, message_nonce, token_address, recipient, amount]
+      const [laneId, _msgNonce, token, recipient, amount] = JSON.parse(this.data) as [
+        string,
         string,
         string | Record<string, any>,
         string,
@@ -86,7 +94,7 @@ export class S2SEventHandler {
         number
       ];
 
-      const event = await S2SEvent.get(messageId);
+      const event = await S2SEvent.get(laneId);
 
       if (event) {
         event.recipient = recipient;

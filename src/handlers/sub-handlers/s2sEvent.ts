@@ -17,9 +17,9 @@ export class S2SEventHandler {
   }
 
   get id() {
-    const data = this.event.event.data;
+    const [laneId, nonce] = JSON.parse(this.data);
 
-    return data[0].toString();
+    return `${laneId}0x${nonce}`;
   }
 
   // hash requestTxHash/responseTxHash
@@ -47,7 +47,7 @@ export class S2SEventHandler {
         string,
         number
       ];
-      const event = new S2SEvent(laneId + nonce);
+      const event = new S2SEvent(this.id);
 
       event.laneId = laneId;
       event.nonce = nonce;
@@ -74,7 +74,7 @@ export class S2SEventHandler {
         boolean
       ];
 
-      const event = await S2SEvent.get(laneId + nonce);
+      const event = await S2SEvent.get(this.id);
 
       if (event) {
         event.responseTxHash = this.extrinsicHash;
@@ -96,7 +96,7 @@ export class S2SEventHandler {
         number
       ];
 
-      const event = await S2SEvent.get(laneId + nonce);
+      const event = await S2SEvent.get(this.id);
 
       if (event) {
         event.laneId = laneId;

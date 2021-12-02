@@ -19,7 +19,7 @@ export class S2SEventHandler {
   get id() {
     const [laneId, nonce] = JSON.parse(this.data);
 
-    return `${laneId}0x${nonce}`;
+    return `${laneId}0x${nonce.toString(16)}`;
   }
 
   // hash requestTxHash/responseTxHash
